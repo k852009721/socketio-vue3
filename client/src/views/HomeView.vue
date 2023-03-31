@@ -1,58 +1,50 @@
 <script setup>
-import { ref } from 'vue'
-import { socket } from '@/socket'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue';
+import { socket } from '@/socket';
+import { useRouter } from 'vue-router';
 
-const router = useRouter()
+const router = useRouter();
 
 const userInfo = ref({
   userName: ``,
-  roomNumber: 1
-})
+  roomNumber: 1,
+});
 
 function goToChatRoom() {
   if (!userInfo.value.userName) {
-    alert('need your name')
-    return
+    alert('need your name');
+    return;
   }
   if (!userInfo.value.roomNumber) {
-    alert('need room number')
-    return
+    alert('need room number');
+    return;
   }
-  socket.connect()
-  socket.emit('join-chat', userInfo.value, (err) => {
-    if (err) {
-      alert(err)
+  socket.connect();
+  socket.emit('joinChat', userInfo.value, (res) => {
+    if (res === 'error') {
+      alert(res);
     } else {
       router.push({
         path: `/chat`,
         query: {
           name: userInfo.value.userName,
-          room: userInfo.value.roomNumber
-        }
-      })
+          room: userInfo.value.roomNumber,
+        },
+      });
     }
-  })
+  });
 }
 </script>
 
 <template>
   <main class="h-full w-full">
     <div class="mx-auto flex flex-col items-center justify-center px-6 py-8 md:h-screen lg:py-0">
-      <div
-        class="w-full rounded-lg bg-white shadow dark:border dark:border-gray-700 dark:bg-gray-800 sm:max-w-md md:mt-0 xl:p-0"
-      >
+      <div class="w-full rounded-lg bg-white shadow dark:border dark:border-gray-700 dark:bg-gray-800 sm:max-w-md md:mt-0 xl:p-0">
         <div class="space-y-4 p-6 sm:p-8 md:space-y-6">
-          <h1
-            class="text-xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white md:text-2xl"
-          >
-            Let's Chat
-          </h1>
+          <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white md:text-2xl">Let's Chat</h1>
           <div class="space-y-4 md:space-y-6" action="#">
             <div>
-              <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                >Your name</label
-              >
+              <label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Your name</label>
               <input
                 type="text"
                 name="name"
@@ -63,9 +55,7 @@ function goToChatRoom() {
               />
             </div>
             <div>
-              <label for="room" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                >Room</label
-              >
+              <label for="room" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Room</label>
               <input
                 type="number"
                 name="room"

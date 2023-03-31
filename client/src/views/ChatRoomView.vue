@@ -1,73 +1,11 @@
 <script setup>
 // import { socket } from '@/socket'
 import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import { socket, state, allMessage } from '@/socket';
 
+const router = useRouter();
 const route = useRoute();
-console.log(route.query);
-
-const roomMessages = ref([
-  {
-    id: 1,
-    isUser: true,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 2,
-    isUser: false,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 3,
-    isUser: false,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 1,
-    isUser: true,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 2,
-    isUser: false,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 3,
-    isUser: false,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 1,
-    isUser: true,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 2,
-    isUser: false,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 3,
-    isUser: false,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 1,
-    isUser: true,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 2,
-    isUser: false,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-  {
-    id: 3,
-    isUser: false,
-    content: `ji3 jiasdf lasdjf asdfadsfl asd fsadlfj sadf sadf sadf jsadlf sadfj sldf lsadfj las`,
-  },
-]);
 const message = ref('');
 const searchUser = ref(null);
 
@@ -87,13 +25,17 @@ function handleMessageSubmit() {
   if (!message.value) {
     return;
   }
-  // socket.emit('send')
-  console.log(`user type this ${message.value}`);
+  socket.emit('messageFromClient', message.value, state.id);
   message.value = ``;
 }
 
 function focusInput() {
   searchUser.value.focus();
+}
+
+function logout() {
+  socket.disconnect();
+  router.push(`/`);
 }
 </script>
 
@@ -128,9 +70,10 @@ function focusInput() {
           <img src="@/assets/profile.svg" alt="default_avatar" />
         </div>
         <div class="ml-4 text-white">{{ route.query.name }}</div>
+        <div class="ml-auto text-white" @click="logout">logout</div>
       </div>
       <div class="scrollbar-hide flex flex-1 flex-col overflow-y-scroll border-y border-y-gray-600 p-4 first:mt-0">
-        <div v-for="message in roomMessages" :key="message.id" class="my-2 flex max-w-md" :class="messagePositionClass(message.isUser)">
+        <div v-for="message in allMessage" :key="message.id" class="my-2 flex max-w-md" :class="messagePositionClass(message.isUser)">
           <div class="h-12 w-12 shrink-0 rounded-md bg-gray-400" :class="messageAvatarClass(message.isUser)">
             <img src="@/assets/profile.svg" alt="default_avatar" />
           </div>
