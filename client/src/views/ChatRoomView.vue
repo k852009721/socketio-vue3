@@ -1,11 +1,15 @@
 <script setup>
 // import { socket } from '@/socket'
+import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { socket, state, allMessage } from '@/socket';
+import { useSocketStore } from '../stores/socket';
+// import { socket, state, allMessage } from '@/socket';
 
 const router = useRouter();
 const route = useRoute();
+const socketStore = useSocketStore();
+const { allMessage } = storeToRefs(socketStore);
 const message = ref('');
 const searchUser = ref(null);
 
@@ -25,7 +29,7 @@ function handleMessageSubmit() {
   if (!message.value) {
     return;
   }
-  socket.emit('messageFromClient', message.value, state.id);
+  socketStore.messageFromClient(message.value);
   message.value = ``;
 }
 
@@ -35,7 +39,6 @@ function focusInput() {
 
 function logout() {
   socket.disconnect();
-  router.push(`/`);
 }
 </script>
 

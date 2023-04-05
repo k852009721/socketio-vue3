@@ -1,10 +1,11 @@
 <script setup>
 import { ref } from 'vue';
-import { socket } from '@/socket';
+// import { socket } from '@/socket';
 import { useRouter } from 'vue-router';
+import { useSocketStore } from '../stores/socket';
 
 const router = useRouter();
-
+const socketStore = useSocketStore();
 const userInfo = ref({
   userName: ``,
   roomNumber: 1,
@@ -19,20 +20,29 @@ function goToChatRoom() {
     alert('need room number');
     return;
   }
-  socket.connect();
-  socket.emit('joinChat', userInfo.value, (res) => {
-    if (res === 'error') {
-      alert(res);
-    } else {
-      router.push({
-        path: `/chat`,
-        query: {
-          name: userInfo.value.userName,
-          room: userInfo.value.roomNumber,
-        },
-      });
-    }
-  });
+
+  // socket.connect();
+  socketStore.connect(userInfo.value);
+  // router.push({
+  //   path: `/chat`,
+  //   query: {
+  //     name: userInfo.value.userName,
+  //     room: userInfo.value.roomNumber,
+  //   },
+  // });
+  // socket.emit('joinChat', userInfo.value, (res) => {
+  //   if (res === 'error') {
+  //     alert(res);
+  //   } else {
+  //     router.push({
+  //       path: `/chat`,
+  //       query: {
+  //         name: userInfo.value.userName,
+  //         room: userInfo.value.roomNumber,
+  //       },
+  //     });
+  //   }
+  // });
 }
 </script>
 

@@ -2,7 +2,7 @@ import { reactive, ref } from 'vue';
 import { io } from 'socket.io-client';
 import { useRouter } from 'vue-router';
 
-const router = useRouter();
+// const router = useRouter();
 
 export const state = reactive({
   connected: false,

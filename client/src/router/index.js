@@ -1,5 +1,7 @@
+import { storeToRefs } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
-import { state } from '@/socket';
+import { useSocketStore } from '../stores/socket';
+// import { state } from '@/socket';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,7 +20,9 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from) => {
-  if (!state.connected && to.name !== 'home') {
+  const socketStore = useSocketStore();
+  const { status } = storeToRefs(socketStore);
+  if (!status.value.isConnect && to.name !== 'home') {
     return { name: 'home' };
   }
 });
