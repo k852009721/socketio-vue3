@@ -12,9 +12,9 @@ module.exports = {
         info: '#3ABFF8',
         success: '#36D399',
         warning: '#FBBD23',
-        error: '#F87272'
-      }
-    }
+        error: '#F87272',
+      },
+    },
   },
-  plugins: [require('prettier-plugin-tailwindcss'), require('@tailwindcss/forms')]
-}
+  plugins: [require('@tailwindcss/forms')],
+};
