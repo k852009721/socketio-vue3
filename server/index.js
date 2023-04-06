@@ -6,6 +6,7 @@ const io = require('socket.io')(http, {
 		origins: ['http://localhost:9487'],
 	},
 })
+const { addUser, removeUser, getUserInRoom } = require('./utils/user')
 const { Configuration, OpenAIApi } = require('openai')
 const configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,
@@ -19,14 +20,19 @@ io.on('connection', (socket) => {
 	console.log('user connect')
 	socket.on('disconnect', () => {
 		console.log('user disconnected')
+		removeUser(socket.id)
 	})
 
 	socket.emit('setUserID', socket.id)
 
-	socket.on('joinChat', (msg, callback) => {
-		const err = 'error'
-		const ok = socket.id
-		return callback(ok)
+	socket.on('joinChat', (status, callback) => {
+		const { error, user } = addUser({ id: socket.id, ...status })
+		if (error) {
+			return callback(error)
+		} else {
+			io.emit('setUsers', getUserInRoom(status.roomNumber))
+			return callback()
+		}
 	})
 
 	socket.on('messageFromClient', async (messageData, userId) => {

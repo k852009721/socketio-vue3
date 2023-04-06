@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { io } from 'socket.io-client';
 import router from '../router';
@@ -14,21 +14,34 @@ export const useSocketStore = defineStore('socket', () => {
     roomNumber: 0,
   });
 
+  const users = ref([]);
+
   const allMessage = ref([]);
 
   socket.on('connect', () => {
-    status.value.isConnect = true;
-    router.push({
-      path: `/chat`,
-      query: {
-        name: status.value.userName,
-        room: status.value.roomNumber,
-      },
+    socket.emit('joinChat', status.value, (res) => {
+      if (res) {
+        socket.disconnect();
+        alert(res);
+      } else {
+        status.value.isConnect = true;
+        router.push({
+          path: `/chat`,
+          query: {
+            name: status.value.userName,
+            room: status.value.roomNumber,
+          },
+        });
+      }
     });
   });
 
   socket.on('setUserID', (id) => {
     status.value.userId = id;
+  });
+
+  socket.on('setUsers', (userInfo) => {
+    users.value = userInfo;
   });
 
   socket.on('disconnect', () => {
@@ -58,5 +71,5 @@ export const useSocketStore = defineStore('socket', () => {
     console.log(message);
     socket.emit('messageFromClient', message, status.value.userId);
   }
-  return { status, allMessage, connect, disconnect, messageFromClient };
+  return { status, users, allMessage, connect, disconnect, messageFromClient };
 });

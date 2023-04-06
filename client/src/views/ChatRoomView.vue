@@ -2,14 +2,14 @@
 // import { socket } from '@/socket'
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useSocketStore } from '../stores/socket';
 // import { socket, state, allMessage } from '@/socket';
 
-const router = useRouter();
+// const router = useRouter();
 const route = useRoute();
 const socketStore = useSocketStore();
-const { allMessage } = storeToRefs(socketStore);
+const { allMessage, users } = storeToRefs(socketStore);
 const message = ref('');
 const searchUser = ref(null);
 
@@ -38,7 +38,8 @@ function focusInput() {
 }
 
 function logout() {
-  socket.disconnect();
+  socketStore.disconnect();
+  // socket.disconnect();
 }
 </script>
 
@@ -56,12 +57,12 @@ function logout() {
         <img src="@/assets/search.svg" alt="search" class="absolute left-1.5 top-1.5 h-5 w-5" @click="focusInput()" />
       </div>
       <div class="mt-4 flex flex-col">
-        <div class="flex">
+        <div v-for="user in users" :key="user.id" class="mt-2 flex">
           <div class="h-10 w-10 shrink-0 rounded-full bg-gray-400">
             <img src="@/assets/profile.svg" alt="default_avatar" />
           </div>
           <div class="ml-2 text-white">
-            <div>Username</div>
+            <div>{{ user.userName }}</div>
             <div class="line-clamp-1 text-xs text-gray-500">半夜肚子餓想吃泡麵半夜肚子餓想吃泡麵</div>
           </div>
         </div>
