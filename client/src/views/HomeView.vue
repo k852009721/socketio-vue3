@@ -2,22 +2,37 @@
 import { ref } from 'vue';
 // import { socket } from '@/socket';
 // import { useRouter } from 'vue-router';
-import { useSocketStore } from '../stores/socket';
+import { useSocketStore } from '@/stores/socket';
+import { useModalStore } from '@/stores/modal';
 
 // const router = useRouter();
 const socketStore = useSocketStore();
+const modalStore = useModalStore();
+const { showModal } = modalStore;
 const userInfo = ref({
   userName: ``,
   roomNumber: 1,
 });
+const nameInput = ref(null);
+const roomInput = ref(null);
 
 function goToChatRoom() {
+  nameInput.value.blur();
+  roomInput.value.blur();
   if (!userInfo.value.userName) {
-    alert('need your name');
+    showModal({
+      title: 'Oops!!',
+      content: 'need your name',
+    });
+    // alert('need your name');
     return;
   }
   if (!userInfo.value.roomNumber) {
-    alert('need room number');
+    showModal({
+      title: 'Oops!!',
+      content: 'need room number',
+    });
+    // alert('need room number');
     return;
   }
 
@@ -62,6 +77,7 @@ function goToChatRoom() {
                 class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
                 placeholder="ex: Kevin"
                 v-model="userInfo.userName"
+                ref="nameInput"
               />
             </div>
             <div>
@@ -75,12 +91,13 @@ function goToChatRoom() {
                 step="1"
                 class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
                 v-model="userInfo.roomNumber"
+                ref="roomInput"
               />
             </div>
             <input
               type="submit"
               value="Go"
-              class="hover:bg-primary-700 focus:ring-primary-300 dark:hover:bg-primary-700 dark:focus:ring-primary-800 w-full rounded-lg bg-primary px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 dark:bg-primary"
+              class="hover:bg-primary-700 focus:ring-primary-300 dark:hover:bg-primary-700 dark:focus:ring-primary-800 w-full cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 dark:bg-primary"
             />
           </form>
         </div>

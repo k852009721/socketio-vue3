@@ -4,11 +4,13 @@ import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useSocketStore } from '../stores/socket';
+import { useModalStore } from '../stores/modal';
 // import { socket, state, allMessage } from '@/socket';
 
 // const router = useRouter();
 const route = useRoute();
 const socketStore = useSocketStore();
+const modalStore = useModalStore();
 const { allMessage, users } = storeToRefs(socketStore);
 const message = ref('');
 const searchUser = ref(null);
@@ -38,8 +40,17 @@ function focusInput() {
 }
 
 function logout() {
+  // socketStore.disconnect();
+  modalStore.showModal({
+    title: 'Logout',
+    content: 'Are you sure you want to logout?',
+    callBack: logoutCallBack,
+  });
+}
+
+function logoutCallBack() {
   socketStore.disconnect();
-  // socket.disconnect();
+  modalStore.closeModal();
 }
 </script>
 
@@ -74,7 +85,7 @@ function logout() {
           <img src="@/assets/profile.svg" alt="default_avatar" />
         </div>
         <div class="ml-4 text-white">{{ route.query.name }}</div>
-        <div class="ml-auto text-white" @click="logout">logout</div>
+        <div class="ml-auto cursor-pointer text-white" @click="logout">logout</div>
       </div>
       <div class="scrollbar-hide flex flex-1 flex-col overflow-y-scroll border-y border-y-gray-600 p-4 first:mt-0">
         <div v-for="message in allMessage" :key="message.id" class="my-2 flex max-w-md" :class="messagePositionClass(message.isUser)">

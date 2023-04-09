@@ -22,6 +22,10 @@ const addUser = ({ id, userName, roomNumber }) => {
 	return { user }
 }
 
+const getUser = (id) => {
+	return userList.find((user) => user.id === id)
+}
+
 const removeUser = (id) => {
 	const index = userList.findIndex((user) => user.id === id)
 	if (index !== -1) {
@@ -35,4 +39,4 @@ const getUserInRoom = (roomNumber) => {
 	})
 }
 
-module.exports = { addUser, removeUser, getUserInRoom }
+module.exports = { addUser, getUser, removeUser, getUserInRoom }

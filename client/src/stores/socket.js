@@ -2,10 +2,12 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { io } from 'socket.io-client';
 import router from '../router';
+import { useModalStore } from './modal';
 
 export const useSocketStore = defineStore('socket', () => {
   const URL = import.meta.env.PROD ? `window.location` : import.meta.env.VITE_SOCKET_ENDPOINT;
   const socket = io(URL, { autoConnect: false });
+  const modalStore = useModalStore();
 
   const status = ref({
     isConnect: false,
@@ -22,7 +24,11 @@ export const useSocketStore = defineStore('socket', () => {
     socket.emit('joinChat', status.value, (res) => {
       if (res) {
         socket.disconnect();
-        alert(res);
+        modalStore.showModal({
+          title: '',
+          content: res,
+        });
+        // alert(res);
       } else {
         status.value.isConnect = true;
         router.push({

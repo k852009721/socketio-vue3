@@ -6,7 +6,7 @@ const io = require('socket.io')(http, {
 		origins: ['http://localhost:9487'],
 	},
 })
-const { addUser, removeUser, getUserInRoom } = require('./utils/user')
+const { addUser, getUser, removeUser, getUserInRoom } = require('./utils/user')
 const { Configuration, OpenAIApi } = require('openai')
 const configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,
@@ -20,7 +20,10 @@ io.on('connection', (socket) => {
 	console.log('user connect')
 	socket.on('disconnect', () => {
 		console.log('user disconnected')
-		removeUser(socket.id)
+		const user = removeUser(socket.id)
+		if (user) {
+			io.to(user.roomNumber).emit('setUsers', getUserInRoom(user.roomNumber))
+		}
 	})
 
 	socket.emit('setUserID', socket.id)
@@ -30,7 +33,8 @@ io.on('connection', (socket) => {
 		if (error) {
 			return callback(error)
 		} else {
-			io.emit('setUsers', getUserInRoom(status.roomNumber))
+			socket.join(status.roomNumber)
+			io.to(status.roomNumber).emit('setUsers', getUserInRoom(status.roomNumber))
 			return callback()
 		}
 	})
@@ -40,7 +44,8 @@ io.on('connection', (socket) => {
 			content: messageData,
 			id: new Date().getMilliseconds(),
 		}
-		io.emit('messageFromServer', message, userId)
+		const user = getUser(userId)
+		io.to(user.roomNumber).emit('messageFromServer', message, userId)
 		// socket.emit("messageFromServer", message, "user");
 		// try {
 		//   const openai = new OpenAIApi(configuration);
