@@ -2,18 +2,16 @@
 // import { socket } from '@/socket'
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useSocketStore } from '../stores/socket';
 import { useModalStore } from '../stores/modal';
-// import { socket, state, allMessage } from '@/socket';
 
+// const route = useRoute();
 const router = useRouter();
-const route = useRoute();
 const socketStore = useSocketStore();
 const modalStore = useModalStore();
-const { allMessage, users } = storeToRefs(socketStore);
+const { gptMessage, status } = storeToRefs(socketStore);
 const message = ref('');
-const searchUser = ref(null);
 
 function messagePositionClass(isUser) {
   return isUser ? `self-end` : ``;
@@ -31,12 +29,8 @@ function handleMessageSubmit() {
   if (!message.value) {
     return;
   }
-  socketStore.messageFromClient(message.value);
+  socketStore.aiMessageFromClient(message.value);
   message.value = ``;
-}
-
-function focusInput() {
-  searchUser.value.focus();
 }
 
 function logout() {
@@ -61,33 +55,10 @@ function logoutCallBack() {
         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-400">
           <img src="@/assets/chat.svg" class="h-8 w-8" alt="chat" />
         </div>
-        <div class="ml-4 text-white">ROOM : {{ route.query.room }}</div>
+        <div class="ml-4 text-white">ROOM : ChatGpt</div>
       </div>
-      <div class="relative mt-4">
-        <input type="text" class="h-8 w-full rounded bg-base-100 pl-8" ref="searchUser" placeholder="find online user" />
-        <img src="@/assets/search.svg" alt="search" class="absolute left-1.5 top-1.5 h-5 w-5" @click="focusInput()" />
-      </div>
-      <div class="mt-4 flex flex-col">
-        <div v-for="user in users" :key="user.id" class="mt-2 flex">
-          <div class="h-10 w-10 shrink-0 rounded-full bg-gray-400">
-            <img src="@/assets/profile.svg" alt="default_avatar" />
-          </div>
-          <div class="ml-2 text-white">
-            <div>{{ user.userName }}</div>
-            <div class="line-clamp-1 text-xs text-gray-500">半夜肚子餓想吃泡麵半夜肚子餓想吃泡麵</div>
-          </div>
-        </div>
-      </div>
-      <div class="mt-auto">
-        <div class="flex cursor-pointer" @click="router.push('/chat/gpt')">
-          <div class="h-10 w-10 shrink-0 rounded-full bg-gray-400">
-            <img src="@/assets/profile.svg" alt="default_avatar" />
-          </div>
-          <div class="ml-2 text-white">
-            <div>ChatGpt</div>
-            <div class="line-clamp-1 text-xs text-gray-500">問答萬事屋</div>
-          </div>
-        </div>
+      <div class="mt-4 flex cursor-pointer rounded bg-primary px-4 py-2 text-white" @click="router.go(-1)">
+        <div>Back to Chat Room</div>
       </div>
     </div>
     <div class="flex flex-1 flex-col">
@@ -95,11 +66,11 @@ function logoutCallBack() {
         <div class="h-10 w-10 shrink-0 rounded-full bg-gray-400">
           <img src="@/assets/profile.svg" alt="default_avatar" />
         </div>
-        <div class="ml-4 text-white">{{ route.query.name }}</div>
+        <div class="ml-4 text-white">{{ status.userName }}</div>
         <div class="ml-auto cursor-pointer text-white" @click="logout">logout</div>
       </div>
       <div class="scrollbar-hide flex flex-1 flex-col overflow-y-scroll border-y border-y-gray-600 p-4 first:mt-0">
-        <div v-for="message in allMessage" :key="message.id" class="my-2 flex max-w-md" :class="messagePositionClass(message.isUser)">
+        <div v-for="message in gptMessage" :key="message.id" class="my-2 flex max-w-md" :class="messagePositionClass(message.isUser)">
           <div class="h-12 w-12 shrink-0 rounded-md bg-gray-400" :class="messageAvatarClass(message.isUser)">
             <img src="@/assets/profile.svg" alt="default_avatar" />
           </div>

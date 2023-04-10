@@ -19,6 +19,7 @@ export const useSocketStore = defineStore('socket', () => {
   const users = ref([]);
 
   const allMessage = ref([]);
+  const gptMessage = ref([]);
 
   socket.on('connect', () => {
     socket.emit('joinChat', status.value, (res) => {
@@ -57,10 +58,13 @@ export const useSocketStore = defineStore('socket', () => {
     router.push(`/`);
   });
 
-  socket.on('messageFromServer', (message, sender) => {
+  socket.on('messageFromServer', (message, sender, isGpt) => {
     sender === status.value.userId ? (message.isUser = true) : (message.isUser = false);
-    // sender === 'user' ? (message.isUser = true) : (message.isUser = false);
-    allMessage.value.push(message);
+    if (isGpt) {
+      gptMessage.value.push(message);
+    } else {
+      allMessage.value.push(message);
+    }
   });
 
   function connect({ userName, roomNumber }) {
@@ -77,5 +81,10 @@ export const useSocketStore = defineStore('socket', () => {
     console.log(message);
     socket.emit('messageFromClient', message, status.value.userId);
   }
-  return { status, users, allMessage, connect, disconnect, messageFromClient };
+
+  function aiMessageFromClient(message) {
+    console.log(message);
+    socket.emit('aiMessageFromClient', message, status.value.userId);
+  }
+  return { status, users, allMessage, gptMessage, connect, disconnect, messageFromClient, aiMessageFromClient };
 });

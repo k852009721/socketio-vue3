@@ -7,6 +7,7 @@ const io = require('socket.io')(http, {
 	},
 })
 const { addUser, getUser, removeUser, getUserInRoom } = require('./utils/user')
+const { addUserChatMessage, removeUserChatMessage, getUserChatMessage } = require('./utils/message')
 const { Configuration, OpenAIApi } = require('openai')
 const configuration = new Configuration({
 	apiKey: process.env.OPENAI_API_KEY,
@@ -46,35 +47,57 @@ io.on('connection', (socket) => {
 		}
 		const user = getUser(userId)
 		io.to(user.roomNumber).emit('messageFromServer', message, userId)
-		// socket.emit("messageFromServer", message, "user");
-		// try {
-		//   const openai = new OpenAIApi(configuration);
-		//   const response = await openai.createCompletion(
-		//     {
-		//       model: "text-davinci-003",
-		//       prompt: messageData,
-		//       max_tokens: 100,
-		//       temperature: 0,
-		//     },
-		//     { timeout: 10000 }
-		//   );
-		//   console.log(response.data.choices[0].text);
-		//   const AImessage = {
-		//     content: response.data.choices[0].text,
-		//     id: new Date().getMilliseconds(),
-		//   };
-		//   socket.emit("messageFromServer", AImessage, "AI");
-		// } catch (error) {
-		//   console.log(error);
-		//   socket.emit(
-		//     "messageFromServer",
-		//     {
-		//       content: "time out",
-		//       id: new Date().getMilliseconds(),
-		//     },
-		//     "AI"
-		//   );
-		// }
+	})
+
+	socket.on('aiMessageFromClient', async (messageData, userId) => {
+		addUserChatMessage({
+			userId: userId,
+			message: messageData,
+			messageRole: 'user',
+		})
+		const messages = getUserChatMessage({ userId: userId })
+		console.log('messages:', messages)
+		const message = {
+			content: messageData,
+			id: new Date().getMilliseconds(),
+		}
+		socket.emit('messageFromServer', message, userId, 'gpt')
+		try {
+			const openai = new OpenAIApi(configuration)
+			const completion = await openai.createChatCompletion(
+				{
+					model: 'gpt-3.5-turbo-0301',
+					messages: messages,
+				},
+				{
+					timeout: 60000,
+				}
+			)
+			console.log(completion.data.choices[0].message)
+			addUserChatMessage({
+				userId: userId,
+				message: completion.data.choices[0].message.content,
+				messageRole: 'assistant',
+			})
+			console.log(completion.data.choices[0].message.content)
+			const AImessage = {
+				content: completion.data.choices[0].message.content,
+				id: new Date().getMilliseconds(),
+			}
+			socket.emit('messageFromServer', AImessage, 'AI', 'gpt')
+		} catch (error) {
+			removeUserChatMessage({ userId: userId })
+			console.log(error)
+			socket.emit(
+				'messageFromServer',
+				{
+					content: 'time out',
+					id: new Date().getMilliseconds(),
+				},
+				'AI',
+				'gpt'
+			)
+		}
 	})
 })
 
