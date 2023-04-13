@@ -46,7 +46,7 @@ io.on('connection', (socket) => {
 			id: new Date().getMilliseconds(),
 		}
 		const user = getUser(userId)
-		io.to(user.roomNumber).emit('messageFromServer', message, userId)
+		io.to(user.roomNumber).emit('messageFromServer', message, userId, 'normal')
 	})
 
 	socket.on('aiMessageFromClient', async (messageData, userId) => {
@@ -98,6 +98,17 @@ io.on('connection', (socket) => {
 				'gpt'
 			)
 		}
+	})
+
+	socket.on('personalMessageFromClient', ({ senderId, receiverId, message }) => {
+		const messageData = {
+			content: message,
+			id: new Date().getMilliseconds(),
+			senderId,
+			receiverId,
+		}
+		socket.emit('messageFromServer', messageData, senderId, 'personal', receiverId)
+		io.to(receiverId).emit('messageFromServer', messageData, senderId, 'personal')
 	})
 })
 

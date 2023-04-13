@@ -16,6 +16,11 @@ const router = createRouter({
       component: () => import('../views/ChatRoomView.vue'),
     },
     {
+      path: '/chat/:id',
+      name: 'chatperson',
+      component: () => import('../views/ChatPersonalRoomView.vue'),
+    },
+    {
       path: '/chat/gpt',
       name: 'chatgpt',
       component: () => import('../views/ChatGptRoomView.vue'),

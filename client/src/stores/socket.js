@@ -20,6 +20,7 @@ export const useSocketStore = defineStore('socket', () => {
 
   const allMessage = ref([]);
   const gptMessage = ref([]);
+  const personalMessage = ref([]);
 
   socket.on('connect', () => {
     socket.emit('joinChat', status.value, (res) => {
@@ -58,12 +59,18 @@ export const useSocketStore = defineStore('socket', () => {
     router.push(`/`);
   });
 
-  socket.on('messageFromServer', (message, sender, isGpt) => {
+  socket.on('messageFromServer', (message, sender, messageType) => {
     sender === status.value.userId ? (message.isUser = true) : (message.isUser = false);
-    if (isGpt) {
-      gptMessage.value.push(message);
-    } else {
-      allMessage.value.push(message);
+    switch (messageType) {
+      case 'normal':
+        allMessage.value.push(message);
+        break;
+      case 'gpt':
+        gptMessage.value.push(message);
+        break;
+      case 'personal':
+        personalMessage.value.push(message);
+        break;
     }
   });
 
@@ -86,5 +93,15 @@ export const useSocketStore = defineStore('socket', () => {
     console.log(message);
     socket.emit('aiMessageFromClient', message, status.value.userId);
   }
-  return { status, users, allMessage, gptMessage, connect, disconnect, messageFromClient, aiMessageFromClient };
+
+  function personalMessageFromClient(receiverId, message) {
+    console.log(receiverId);
+    const personalMessageInfo = {
+      senderId: status.value.userId,
+      receiverId: receiverId,
+      message: message,
+    };
+    socket.emit('personalMessageFromClient', personalMessageInfo);
+  }
+  return { status, users, allMessage, gptMessage, personalMessage, connect, disconnect, messageFromClient, aiMessageFromClient, personalMessageFromClient };
 });

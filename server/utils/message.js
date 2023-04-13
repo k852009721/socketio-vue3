@@ -5,6 +5,10 @@ const addUserChatMessage = ({ userId, message, messageRole }) => {
 		messageList[userId] = []
 	}
 
+	if (messageList[userId].length > 20) {
+		messageList[userId].shift()
+	}
+
 	messageList[userId].push({
 		role: messageRole,
 		content: message,
